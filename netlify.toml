@@ -18,7 +18,15 @@
     "puppeteer-extra",
     "puppeteer-extra-plugin-stealth"
   ]
-  included_files = ["node_modules/@sparticuz/chromium/bin/**"]
+  # esbuild/ZISI can't trace the stealth plugin's dynamic require() of its evasion
+  # submodules (e.g. evasions/chrome.app), so they get dropped from the bundle and the
+  # plugin fails at runtime. Force-ship the whole package — and its puppeteer-extra base,
+  # which is likewise loaded dynamically — so every evasion is present in the function.
+  included_files = [
+    "node_modules/@sparticuz/chromium/bin/**",
+    "node_modules/puppeteer-extra-plugin-stealth/**",
+    "node_modules/puppeteer-extra/**"
+  ]
 
 # Clean URL for the streaming scan function (must come BEFORE the SPA fallback).
 [[redirects]]
