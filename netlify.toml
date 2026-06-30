@@ -4,6 +4,11 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Pin the FUNCTION runtime to Node 20 too. @sparticuz/chromium reads this to pick its
+  # shared-lib bundle: without "20.x"/"22.x" it extracts al2.tar.br, which lacks
+  # libnspr4.so, and Chromium fails to launch ("error while loading shared libraries").
+  # nodejs20.x makes it extract al2023.tar.br (the bundle that ships libnspr4).
+  AWS_LAMBDA_JS_RUNTIME = "nodejs20.x"
 
 [functions]
   directory = "netlify/functions"
