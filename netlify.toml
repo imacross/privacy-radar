@@ -1,0 +1,37 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  # The browser engine + stealth plugin must not be inlined by esbuild:
+  #  - @sparticuz/chromium ships a brotli-packed Chromium binary esbuild can't bundle.
+  #  - puppeteer-extra-plugin-stealth loads its evasions via dynamic require() which
+  #    esbuild can't statically resolve. Keep all of them external and ship from node_modules.
+  external_node_modules = [
+    "@sparticuz/chromium",
+    "puppeteer-core",
+    "puppeteer-extra",
+    "puppeteer-extra-plugin-stealth"
+  ]
+  included_files = ["node_modules/@sparticuz/chromium/bin/**"]
+
+# Clean URL for the streaming scan function (must come BEFORE the SPA fallback).
+[[redirects]]
+  from = "/api/scan"
+  to = "/.netlify/functions/scan"
+  status = 200
+
+# SPA fallback — every other path serves the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  framework = "vite"
+  targetPort = 5173
