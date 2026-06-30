@@ -62,6 +62,28 @@ export function Landing({ phase, onScan }: Props) {
           ))}
         </div>
       </section>
+
+      <section className="landing-ext">
+        <div className="ext-copy">
+          <span className="ext-badge">🧩 Browser extension</span>
+          <h2>
+            Take the radar <span>everywhere you browse</span>
+          </h2>
+          <p>
+            Install the Chrome extension and get a live A–F privacy grade for every
+            site you visit — no URL to paste, no server involved. It watches the
+            requests your own browser makes and flags fingerprinting in real time.
+          </p>
+          <a className="ext-download" href="/privacy-radar-extension.zip" download>
+            <span className="ext-dl-icon">⬇</span>
+            <span className="ext-dl-text">
+              Download for Chrome
+              <small>Manifest V3 · Load unpacked · 100% local</small>
+            </span>
+          </a>
+        </div>
+        <img className="ext-art" src="/radar.svg" alt="" />
+      </section>
     </div>
   );
 }

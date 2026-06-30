@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "build:trackers": "node scripts/build-trackers.mjs"
+    "build:trackers": "node scripts/build-trackers.mjs",
+    "build:extension": "node scripts/build-extension.mjs"
   },
   "dependencies": {
     "@sparticuz/chromium": "^131.0.1",

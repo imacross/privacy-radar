@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>Privacy Radar</title>
+  </head>
+  <body>
+    <header class="pr-top">
+      <img src="icons/icon48.png" width="22" height="22" alt="" />
+      <span class="pr-brand">Privacy<b>Radar</b></span>
+      <span class="pr-host" id="host"></span>
+    </header>
+
+    <main id="content">
+      <div class="pr-empty" id="empty">Reading this tab…</div>
+    </main>
+
+    <footer class="pr-foot">
+      <span id="elapsed"></span>
+      <a id="deep" href="#" target="_blank" rel="noopener">Deep scan on the web →</a>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
