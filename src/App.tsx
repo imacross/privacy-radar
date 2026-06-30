@@ -8,6 +8,7 @@ import { ScorePanel } from "./components/ScorePanel";
 import { Summary } from "./components/Summary";
 import { FingerprintAlert } from "./components/FingerprintAlert";
 import { NodeCard } from "./components/NodeCard";
+import { SafeState } from "./components/SafeState";
 import type { ScanEvent } from "../shared/types";
 
 export default function App() {
@@ -37,6 +38,8 @@ export default function App() {
   }, [reset]);
 
   const showResults = state.phase === "done" || state.phase === "error";
+  const companies = state.summary ? state.summary.entities.length : state.tpEntities.length;
+  const graphEmpty = state.phase === "done" && companies === 0;
 
   return (
     <div className={"app" + (showResults ? " results" : "")}>
@@ -57,9 +60,15 @@ export default function App() {
           </header>
 
           <aside className="result-bar panel">
-            <ScorePanel score={state.summary?.score ?? state.liveScore} phase={state.phase} />
+            <ScorePanel
+              score={state.summary?.score ?? state.liveScore}
+              phase={state.phase}
+              siteHost={state.siteHost}
+            />
             <Summary state={state} />
           </aside>
+
+          {graphEmpty && <SafeState state={state} />}
 
           <FingerprintAlert apis={state.fpApis} strong={state.strongFp} />
           {selected && <NodeCard node={selected} onClose={() => setSelected(null)} />}

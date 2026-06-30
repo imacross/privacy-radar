@@ -46,12 +46,11 @@ function normKey(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-// Stable base angle per category so each category occupies its own sector of the ring.
 const CATEGORY_ORDER = Object.keys(CATEGORY_META) as TrackerCategory[];
-const CATEGORY_BASE_ANGLE: Record<string, number> = {};
-CATEGORY_ORDER.forEach((cat, i) => {
-  CATEGORY_BASE_ANGLE[cat] = (i / CATEGORY_ORDER.length) * Math.PI * 2 - Math.PI / 2;
-});
+
+// Golden angle (~137.5°): handing each successive node this increment spreads
+// them evenly around the full circle without ever knowing the final count.
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 export const Graph = forwardRef<GraphHandle, Props>(function Graph({ onSelect, split }, ref) {
   const fgRef = useRef<any>(null);
@@ -97,15 +96,12 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph({ onSelect, s
     }, 450);
   };
 
-  // Assign a target angle that fans nodes out within their category's sector.
-  const angleFor = (cat: TrackerCategory): number => {
-    const base = CATEGORY_BASE_ANGLE[cat] ?? 0;
-    const i = catCounts.current.get(cat) ?? 0;
-    catCounts.current.set(cat, i + 1);
-    // symmetric fan: 0, +s, -s, +2s, -2s ...
-    const step = 0.16;
-    const offset = Math.ceil(i / 2) * step * (i % 2 === 0 ? 1 : -1);
-    return base + offset;
+  // Assign a target angle that spreads every leaf evenly around the center,
+  // regardless of category, via the golden-angle increment.
+  const angleFor = (): number => {
+    const i = catCounts.current.get("__all__") ?? 0;
+    catCounts.current.set("__all__", i + 1);
+    return i * GOLDEN_ANGLE;
   };
 
   // Spread out + cluster by category: stronger repulsion, longer links, and a
@@ -123,14 +119,15 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph({ onSelect, s
         const cx = c?.x ?? 0;
         const cy = c?.y ?? 0;
         const k = alpha * 0.5;
+        // Ring radius grows with the leaf count so a busy graph fans out into a
+        // wider, evenly-spaced ring instead of piling up near the center.
+        const leaves = _nodes.length - 1;
+        const radius = Math.max(120, 70 + Math.sqrt(Math.max(leaves, 1)) * 34);
         for (const n of _nodes) {
           if (n.isCenter || n.angle == null) continue;
-          const dx = (n.x ?? 0) - cx;
-          const dy = (n.y ?? 0) - cy;
-          const dist = Math.hypot(dx, dy) || 1;
-          // target point: same distance from center, but along the category ray
-          const tx = cx + Math.cos(n.angle) * dist;
-          const ty = cy + Math.sin(n.angle) * dist;
+          // target point: fixed angle AND fixed radius -> an even ring.
+          const tx = cx + Math.cos(n.angle) * radius;
+          const ty = cy + Math.sin(n.angle) * radius;
           n.vx = (n.vx ?? 0) + (tx - (n.x ?? 0)) * k;
           n.vy = (n.vy ?? 0) + (ty - (n.y ?? 0)) * k;
         }
@@ -204,7 +201,7 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph({ onSelect, s
           count: 0,
           known: req.known,
           fingerprinting: req.fingerprinting,
-          angle: angleFor(req.category),
+          angle: angleFor(),
         };
         nodeMap.current.set(key, node);
         nodesRef.current.push(node);
@@ -217,7 +214,7 @@ export const Graph = forwardRef<GraphHandle, Props>(function Graph({ onSelect, s
         node.known = true;
         node.entity = req.entity;
         node.category = req.category;
-        node.angle = angleFor(req.category);
+        node.angle = angleFor();
         changed = true;
       }
       node.count++;

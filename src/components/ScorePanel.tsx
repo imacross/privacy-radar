@@ -17,13 +17,28 @@ const GRADE_VERDICT: Record<Grade, string> = {
   F: "Critical — heavily tracked",
 };
 
-export function ScorePanel({ score, phase }: { score: ScoreResult; phase: Phase }) {
+export function ScorePanel({
+  score,
+  phase,
+  siteHost,
+}: {
+  score: ScoreResult;
+  phase: Phase;
+  siteHost?: string;
+}) {
   if (phase === "idle") return null;
   const col = GRADE_COLOR[score.grade];
   const pct = Math.max(0, Math.min(100, score.value));
+  const cleanHost = siteHost?.replace(/^www\./, "");
 
   return (
     <section className="panel score-panel">
+      {cleanHost && (
+        <div className="score-site">
+          <span className="score-site-dot" style={{ background: col }} />
+          <h2 className="score-site-name">{cleanHost}</h2>
+        </div>
+      )}
       <div className="score-hero">
         <div
           className="grade"
